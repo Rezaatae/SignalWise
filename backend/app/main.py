@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="My App API")
+app = FastAPI(title="SignalWise API")
 
 
 app.add_middleware(

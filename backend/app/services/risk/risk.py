@@ -1,0 +1,2 @@
+class Risk:
+    pass
