@@ -17,5 +17,3 @@ class Data:
             end=self.startDate,
             auto_adjust=True
             ).Close[self.instrument]
-
-    

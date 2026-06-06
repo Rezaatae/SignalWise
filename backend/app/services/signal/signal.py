@@ -1,31 +1,35 @@
 import math
 import pandas as pd
 import numpy as np
+import collections
+from collections import deque
+from app.schemas.signal import SignalResponse
 
 class Signal:
-    def __init__(self, priceData, strategyType, strategyConfig):
+    def __init__(self, strategyType, strategyConfig):
         self.strategyType=strategyType
         self.strategyConfig=strategyConfig
-        self.priceData=priceData
-        self.priceDataList=[]
+        self._fast_ma_window=strategyConfig["fast_ma_window"]
+        self._slow_ma_window=strategyConfig["slow_ma_window"]
+        self._price_deque=deque([], maxlen=self._fast_ma_window)
 
-    def generate_signal(self, price_data):
-        self.priceDataList.append(price_data)
-        if self.strategyType=="MACrossover":
-            return self.generate_MACrossover_signal(self.priceDataList, self.strategyConfig)
+    def generate_signal(self, price):
+        return self.generate_MACrossover_signal(price, self.strategyConfig)
     
-    def generate_MACrossover_signal(self, price_list, config):
-        if len(price_list) < config["slow_ma"]:
-            return "HOLD"
-        if len(price_list) >= config["slow_ma"]:
-            sma1=price_list.rolling(window=config["fast_ma"]).mean()
-            sma2=price_list.rolling(window=config["slow_ma"]).mean()
-            if sma1[-1] > sma2[-1]: # most likely wrong, just scaffolding
-                return "BUY"
-            elif sma1[-1] < sma2[-1]:
-                return "SELL"
+    def generate_MACrossover_signal(self, price, config):
+        self._price_deque.append(price['Close'])
+        signal = SignalResponse()
+        signal.timestamp = price['timestamp']
+        if len(self._price_deque) < config["fast_ma_window"]:
+            signal.direction = None
+        else:
+            slow_ma_price_list = list(self._price_deque)[-self._slow_ma_window:]
+            fast_ma=sum(self._price_deque)/len(self._price_deque) # fast ma
+            slow_ma=sum(slow_ma_price_list)/len(slow_ma_price_list) # slow ma
+            if fast_ma > slow_ma:
+                signal.direction = -1
+            elif fast_ma < slow_ma:
+                signal.direction = 1
             else:
-                return "HOLD"
-    
-    def clear_price_data(self):
-        self.priceDataList.clear()
+                signal.direction = 0
+        return signal

@@ -26,4 +26,3 @@ class Backtest:
             fill = execution_engine.execute(order)
             portfolio.update(fill)
             analytics_engine.record(portfolio)
-        signal_engine.clear_price_data()
