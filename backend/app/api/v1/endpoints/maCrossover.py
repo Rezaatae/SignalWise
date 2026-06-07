@@ -5,6 +5,6 @@ from app.services.backtest.backtest import Backtest
 router = APIRouter()
 
 @router.post("/ma-crossover/{instrument}")
-async def run_ma_crossover(instrument: str, MACrossoverConfig: MACrossoverRequest):
+def run_ma_crossover(instrument: str, MACrossoverConfig: MACrossoverRequest):
     bt = Backtest(instrument=instrument, strategyType="MACrossover", strategyConfig=MACrossoverConfig)
-    return await bt.run()
+    return bt.run()

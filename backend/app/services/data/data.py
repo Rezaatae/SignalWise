@@ -1,7 +1,6 @@
-import numpy as np
-import pandas as pd
-import datetime as dt
-import yfinance as yf
+from app.clients.yahoo_finance import get_daily_prices
+
+from app.services.adapters.yf_adapter import yf_raw_to_ohlcv
 
 class Data:
     def __init__(self, instrument: str, startDate, endDate):
@@ -10,10 +9,5 @@ class Data:
         self.endDate = endDate
 
     def get_market_data(self):
-        # pass through adapter first
-        return yf.download(
-            self.instrument,
-            start=self.startDate,
-            end=self.startDate,
-            auto_adjust=True
-            ).Close[self.instrument]
+        raw = get_daily_prices(self.instrument, self.startDate, self.endDate)
+        return yf_raw_to_ohlcv(self.instrument, raw)
