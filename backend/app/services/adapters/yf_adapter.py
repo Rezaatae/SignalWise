@@ -35,9 +35,6 @@ def yf_raw_to_ohlcv(instrument, raw_data):
         symbol=instrument,
         data=result
     )
-    
-def is_invalid(value: str):
-    return value in ("N/A", "", None)
 
 def keep_column_level(df, target_cols=['Close', 'High', 'Low', 'Open', 'Volume']):
     target_cols = set(map(str, target_cols))
