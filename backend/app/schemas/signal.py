@@ -4,3 +4,4 @@ from datetime import datetime
 class SignalResponse(BaseModel):
     timestamp: datetime
     direction: int
+    isNewSignal: bool
