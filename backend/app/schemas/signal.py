@@ -1,7 +1,8 @@
 from pydantic import BaseModel
-from datetime import datetime
+from app.schemas.ohlvc import OHLCV
 
 class SignalResponse(BaseModel):
-    timestamp: datetime
+    instrument: str
+    price: OHLCV
     direction: int
     isNewSignal: bool
