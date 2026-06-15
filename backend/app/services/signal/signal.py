@@ -13,7 +13,7 @@ class Signal:
         self._slow_price_deque=deque([], maxlen=self._slow_ma_window)
         self.last_signal_direction=None
 
-    def generate_signal(self, price):
+    def generate_signal(self, price: OHLCV):
         return self.generate_MACrossover_signal(price)
     
     def generate_MACrossover_signal(self, price: OHLCV):

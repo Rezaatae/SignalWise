@@ -23,9 +23,9 @@ class Backtest:
 
         for row in market_data.data:
             signal = signal_engine.generate_signal(price=row)
-            test_return_value.append(signal)
             target_position = portfolio.construct_target_position(signal)
-            # order = portfolio.create_order(target_position)
+            order = portfolio.create_order(target_position)
+            test_return_value.append(order)
             # fill = execution_engine.execute(order)
             # portfolio.update(fill)
             # analytics_engine.record(portfolio)

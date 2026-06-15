@@ -3,6 +3,6 @@ from app.schemas.ohlvc import OHLCV
 
 class SignalResponse(BaseModel):
     instrument: str
-    price: OHLCV
+    sharePrice: OHLCV
     direction: int
     isNewSignal: bool
