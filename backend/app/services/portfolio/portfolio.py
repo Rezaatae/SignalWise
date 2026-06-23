@@ -1,5 +1,5 @@
 from app.schemas.signal import SignalResponse
-from app.schemas.portfolio import Position, Order
+from app.schemas.order import Position, Order
 
 class Portfolio:
     def __init__(self):
@@ -39,7 +39,7 @@ class Portfolio:
         else:
             order_type = "HOLD"
             order_shares=self.holdings[targetPosition.instrument] if is_asset_held else 0
-        return Order(orderType=order_type, instrument=targetPosition.instrument, shares=order_shares, price=targetPosition.price)
+        return Order(order_type=order_type, instrument=targetPosition.instrument, quantity=order_shares)
 
     def update(self):
         pass
