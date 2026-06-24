@@ -4,11 +4,11 @@ from app.schemas.order import Position, Order
 class Portfolio:
     def __init__(self):
         self.cash=250000.00
-        self.holdings={} # {instrument: str, shares: int}
+        self.holdings: dict[str, int]={} # {instrument: str, shares: int}
         self.equity=250000.00
         pass
 
-    def get_portfolio_state(self):
+    def get_portfolio_state(self) -> dict[int, dict, int]:
         return {"cash":self.cash, "holdings":self.holdings, "equity":self.equity}
 
     def construct_target_position(self, signal: SignalResponse) -> Position:

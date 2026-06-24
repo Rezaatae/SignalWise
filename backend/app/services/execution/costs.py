@@ -9,7 +9,7 @@ class PercentageCostModel:
         cost = £1.00
     """
 
-    def __init__(self, commission_bps: float):
+    def __init__(self, commission_bps: float=0.5):
         self.commission_bps = commission_bps
 
     def calculate(self, notional: float) -> float:

@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 
 class FixedLatencyModel:
 
-    def __init__(self, milliseconds: int):
+    def __init__(self, milliseconds: int=1000):
         self.delay = timedelta(milliseconds=milliseconds)
 
     def execution_time(

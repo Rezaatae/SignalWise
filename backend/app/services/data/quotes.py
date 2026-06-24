@@ -2,7 +2,7 @@ from datetime import datetime
 from app.schemas.order import Quote
 
 
-def simulate_quote(symbol: str, timestamp: datetime, reference_price: float, daily_volume: int, spread_bps: float = 5.0, liquidity_pct: float = 0.05) -> Quote:
+def simulate_quote(instrument: str, timestamp: datetime, reference_price: float, daily_volume: int, spread_bps: float = 5.0, liquidity_pct: float = 0.05) -> Quote:
     """
     Create a synthetic quote from OHLCV data.
 
@@ -25,7 +25,7 @@ def simulate_quote(symbol: str, timestamp: datetime, reference_price: float, dai
     available_size = int(daily_volume * liquidity_pct)
 
     return Quote(
-        symbol=symbol,
+        instrument=instrument,
         timestamp=timestamp,
         bid=bid,
         ask=ask,

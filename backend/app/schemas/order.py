@@ -43,7 +43,7 @@ class Order(BaseModel):
         return self.quantity - self.filled_quantity
     
 class Quote(BaseModel):
-    symbol: str
+    instrument: str
 
     timestamp: datetime
 
