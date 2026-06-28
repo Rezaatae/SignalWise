@@ -40,7 +40,10 @@ class Portfolio:
         else:
             order_type = OrderType.HOLD
             order_shares=self.holdings[targetPosition.instrument] if is_asset_held else 0
-        return Order(instrument=targetPosition.instrument, order_type=order_type, quantity=order_shares, created_at=datetime.now())
+        return Order(instrument=targetPosition.instrument, 
+                     order_type=order_type, 
+                     quantity=order_shares, 
+                     created_at=datetime.now())
 
     def update(self):
         pass
