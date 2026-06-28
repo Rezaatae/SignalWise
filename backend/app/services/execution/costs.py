@@ -1,16 +1,16 @@
 class PercentageCostModel:
     """
-    Transaction costs expressed in basis points (bps).
+    Transaction costs expressed percentage of trade value.
 
     Example:
-        commission_bps = 1.0
+        commission_rate = 0.25%
 
         £10,000 trade
-        cost = £1.00
+        cost = £25.00
     """
 
-    def __init__(self, commission_bps: float=0.5):
-        self.commission_bps = commission_bps
+    def __init__(self, commission_rate: float=0.25):
+        self.commission_rate = commission_rate
 
-    def calculate(self, notional: float) -> float:
-        return notional * self.commission_bps / 10_000
+    def calculate(self, trade_value: float) -> float:
+        return trade_value * self.commission_rate / 100

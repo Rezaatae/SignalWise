@@ -13,7 +13,6 @@ class Execution:
         order.status=OrderStatus.PENDING
         self.orders[order.order_id] = order
 
-
     def process_orders(self, quote: Quote) -> List[Fill]:
         fills = []
         for order in self.orders.values():
@@ -26,7 +25,7 @@ class Execution:
             if qty == 0:
                 continue
 
-            commission = self.cost_model.calculate(qty, price)
+            commission = self.cost_model.calculate(qty*price)
 
             fill = Fill(
                 order_id=order.order_id,

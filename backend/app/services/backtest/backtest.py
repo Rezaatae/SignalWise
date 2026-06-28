@@ -15,9 +15,9 @@ class Backtest:
         self.instrument = instrument
         self.strategyType = strategyType
         self.strategyConfig = strategyConfig
-        self.latency_model = FillSimulator
+        self.latency_model =  FixedLatencyModel()
         self.cost_model = PercentageCostModel()
-        self.fill_simulator = FixedLatencyModel()
+        self.fill_simulator = FillSimulator()
 
     def run(self):
         test_return_value = []
@@ -32,9 +32,10 @@ class Backtest:
         for row in market_data.data:
             market_quote = simulate_quote(self.instrument, row.timestamp, row.open, row.volume)
             signal = signal_engine.generate_signal(price=row)
-            target_position = portfolio.construct_target_position(signal)
-            order = portfolio.create_order(target_position)
-            execution_engine.submit_order(order)
+            if signal.isNewSignal:
+                target_position = portfolio.construct_target_position(signal)
+                order = portfolio.create_order(target_position)
+                execution_engine.submit_order(order)
             fills = execution_engine.process_orders(market_quote)
             test_return_value.append(fills)
             # portfolio.update(fill)

@@ -1,5 +1,6 @@
 from app.schemas.signal import SignalResponse
-from app.schemas.order import Position, Order
+from app.schemas.order import Position, Order, OrderType
+from datetime import datetime
 
 class Portfolio:
     def __init__(self):
@@ -31,15 +32,15 @@ class Portfolio:
         if targetPosition.allocation > 0:
             # calculate shares to buy
             order_shares=(self.cash * order_allocation)//targetPosition.price.close if not is_asset_held else self.holdings[targetPosition.instrument] - self.cash//targetPosition.price.close
-            order_type = "BUY"
+            order_type = OrderType.BUY
         elif targetPosition.allocation < 0:
             # calculate shares to buy
-            order_type = "SELL"
+            order_type = OrderType.SELL
             order_shares=self.holdings[targetPosition.instrument] * order_allocation if is_asset_held else 0
         else:
-            order_type = "HOLD"
+            order_type = OrderType.HOLD
             order_shares=self.holdings[targetPosition.instrument] if is_asset_held else 0
-        return Order(order_type=order_type, instrument=targetPosition.instrument, quantity=order_shares)
+        return Order(instrument=targetPosition.instrument, order_type=order_type, quantity=order_shares, created_at=datetime.now())
 
     def update(self):
         pass
