@@ -20,7 +20,7 @@ class Execution:
                 continue
             if order.status == OrderStatus.FILLED:
                 continue
-            qty, price = self.fill_simulator.fill_order(order, quote)
+            qty, price, order_type = self.fill_simulator.fill_order(order, quote)
 
             if qty == 0:
                 continue
@@ -29,6 +29,7 @@ class Execution:
 
             fill = Fill(
                 order_id=order.order_id,
+                order_type=order_type,
                 instrument=order.instrument,
                 quantity=qty,
                 price=price,

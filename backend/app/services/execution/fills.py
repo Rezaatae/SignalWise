@@ -10,4 +10,4 @@ class FillSimulator:
             executable_qty = min(order.remaining_quantity, quote.available_bid_size)
             price = quote.bid
 
-        return executable_qty, price
+        return executable_qty, price, order.order_type

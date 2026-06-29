@@ -2,13 +2,40 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import uuid4
 from app.schemas.ohlvc import OHLCV
-
+from typing import List
 from pydantic import BaseModel, Field
 
-class Position(BaseModel):
+class Holding(BaseModel):
     instrument: str
-    allocation: int
-    price: OHLCV
+
+    quantity: int
+
+    costHistory: List[float]
+
+    @property
+    def averageCost(self) -> float:
+        return sum(self.costHistory)/len(self.costHistory)
+
+class Position(BaseModel):
+    instrumnet: str
+    
+    holding: Holding
+
+    marketPrice: float
+
+    @property
+    def marketValue(self):
+        self.holding.quantity*self.marketPrice
+
+    @property
+    def costBasis(self):
+        self.holding.quantity*self.holding.averageCost
+
+    @property
+    def unrealizedPnL(self):
+        self.marketValue - self.costBasis
+
+
 
 class OrderType(StrEnum):
     BUY = "BUY"
@@ -55,6 +82,8 @@ class Quote(BaseModel):
 
 class Fill(BaseModel):
     order_id: str
+
+    order_type: str
 
     instrument: str
 
