@@ -37,7 +37,7 @@ class Backtest:
                 order = portfolio.create_order(target_position)
                 execution_engine.submit_order(order)
             fills = execution_engine.process_orders(market_quote)
-            test_return_value.append(fills)
-            # portfolio.update(fill)
+            portfolio.update(fills)
+            test_return_value.append(portfolio.get_portfolio_state())
             # analytics_engine.record(portfolio)
         return test_return_value

@@ -11,7 +11,7 @@ class Portfolio:
         self.pnl=0
 
     def get_portfolio_state(self) -> dict[int, dict, int]:
-        return {"cash":self.cash, "holdings":self.holdings, "equity":self.equity}
+        return {"cash":self.cash, "holdings":self.holdings, "positions":self.positions, "equity":self.equity, "pnl":self.pnl}
 
     def construct_target_position(self, signal: SignalResponse) -> Position:
         signal_direction = signal.direction
@@ -48,7 +48,7 @@ class Portfolio:
 
     def update(self, fills: list[Fill]):
         if fills:
-            for fill in fills:
+            for fill in fills: # todo: track Fill statuses and only processes new fills
                 trade_value = (fill.price * fill.quantity) - fill.commission
                 if fill.order_type == OrderType.BUY:
                     # update cash
@@ -65,11 +65,16 @@ class Portfolio:
                     else:
                         self.positions[fill.instrument].holding = self.holdings[fill.instrument]
                         self.positions[fill.instrument].marketPrice = fill.price
-                else:
+                    # todo: update equity
+                else: # fill.order_type == OrderType.SELL
                     # update cash
-                    #self.cash += trade_value
+                    self.cash += trade_value
                     #update hodlings
-                    #self.holdings[fill.instrument] -= fill.quantity
+                    self.holdings[fill.instrument].quantity -= fill.quantity
+                    self.holdings[fill.instrument].costHistory.append(fill.price)
                     # update positions
-                    pass
-                
+                    self.positions[fill.instrument].holding = self.holdings[fill.instrument]
+                    self.positions[fill.instrument].marketPrice = fill.price
+                    # update pnl
+                    self.pnl+=trade_value      
+                    # todo: pdate equity       
