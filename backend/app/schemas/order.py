@@ -14,10 +14,10 @@ class Holding(BaseModel):
 
     @property
     def averageCost(self) -> float:
-        return sum(self.costHistory)/len(self.costHistory)
+        return sum(self.costHistory)/len(self.costHistory) if self.costHistory else 0
 
 class Position(BaseModel):
-    instrumnet: str
+    instrument: str
     
     holding: Holding
 
