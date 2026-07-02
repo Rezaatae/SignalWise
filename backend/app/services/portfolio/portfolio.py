@@ -10,7 +10,7 @@ class Portfolio:
         self.equity=250000.00
         self.pnl=0
 
-    def get_portfolio_state(self) -> dict[int, dict, int]:
+    def get_portfolio_state(self) -> dict[float, dict, dict, float, float]:
         return {"cash":self.cash, "holdings":self.holdings, "positions":self.positions, "equity":self.equity, "pnl":self.pnl}
 
     def construct_target_position(self, signal: SignalResponse) -> Position:
@@ -49,7 +49,7 @@ class Portfolio:
 
     def update(self, fills: list[Fill]):
         if fills:
-            for fill in fills: # todo: track Fill statuses and only processes new fills
+            for fill in fills:
                 trade_value = (fill.price * fill.quantity) - fill.commission
                 if fill.order_type == OrderType.BUY:
                     # update cash

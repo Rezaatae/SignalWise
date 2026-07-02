@@ -35,9 +35,16 @@ class Backtest:
             if signal.isNewSignal:
                 target_position = portfolio.construct_target_position(signal)
                 order = portfolio.create_order(target_position)
+                print("reztest data row")
+                print(row)
+                print("reztest Order")
+                print(order)
                 execution_engine.submit_order(order)
             fills = execution_engine.process_orders(market_quote)
+            if(fills):
+                print("reztest fills")
+                print(fills)
             portfolio.update(fills)
-            test_return_value.append(portfolio.get_portfolio_state())
             # analytics_engine.record(portfolio)
+        test_return_value.append(portfolio.get_portfolio_state())
         return test_return_value
