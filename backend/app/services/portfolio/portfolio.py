@@ -3,11 +3,11 @@ from app.schemas.order import Position, Order, OrderType, Fill, Holding
 from datetime import datetime
 
 class Portfolio:
-    def __init__(self):
-        self.cash=250000.00
-        self.holdings: dict[str, Holding]={} # {instrument: str, holding: Holding}
-        self.positions: dict[str, Position]={} # {instrument: str, position: Position}
-        self.equity=250000.00
+    def __init__(self, cash: float=250000.00, holdings: dict[str, Holding]={}, positions: dict[str, Position]={}):
+        self.cash=cash
+        self.holdings=holdings
+        self.positions=positions
+        self.equity=self.cash + sum([position.unrealizedPnL for position in self.positions.values()])
         self.pnl=0
 
     def get_portfolio_state(self) -> dict[float, dict, dict, float, float]:
