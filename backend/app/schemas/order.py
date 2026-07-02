@@ -5,10 +5,12 @@ from app.schemas.ohlvc import OHLCV
 from typing import List
 from pydantic import BaseModel, Field
 
-class Holding(BaseModel):
+class Position(BaseModel):
     instrument: str
 
     quantity: int
+
+    marketPrice: float
 
     costHistory: List[float]
 
@@ -16,25 +18,17 @@ class Holding(BaseModel):
     def averageCost(self) -> float:
         return sum(self.costHistory)/len(self.costHistory) if self.costHistory else 0
 
-class Position(BaseModel):
-    instrument: str
-    
-    holding: Holding
-
-    marketPrice: float
-
     @property
     def marketValue(self):
-        self.holding.quantity*self.marketPrice
+        return self.quantity*self.marketPrice
 
     @property
     def costBasis(self):
-        self.holding.quantity*self.holding.averageCost
+        return self.quantity*self.averageCost
 
     @property
     def unrealizedPnL(self):
-        self.marketValue - self.costBasis
-
+        return self.marketValue - self.costBasis
 
 
 class OrderType(StrEnum):
@@ -55,6 +49,7 @@ class Order(BaseModel):
     order_id: str = Field(default_factory=lambda: str(uuid4()))
 
     instrument: str
+    
     order_type: OrderType
 
     quantity: int
