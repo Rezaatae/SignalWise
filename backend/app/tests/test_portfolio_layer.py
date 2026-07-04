@@ -1,8 +1,7 @@
 from app.services.portfolio.portfolio import Portfolio
 from app.schemas.signal import SignalResponse
 from app.schemas.ohlvc import OHLCV
-from datetime import datetime
-from app.schemas.order import Position, Order, OrderType, Fill
+from app.schemas.order import Position, OrderType
 
 
 def test_portfolio_creates_buy_target_position_from_signal():
