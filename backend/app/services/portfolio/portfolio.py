@@ -49,14 +49,15 @@ class Portfolio:
         if fills:
             for fill in fills:
                 trade_value = (fill.price * fill.quantity) - fill.commission
+                trade_cost = (fill.price * fill.quantity) + fill.commission
                 if fill.order_type == OrderType.BUY:
                     # update cash
-                    self.cash -= trade_value
+                    self.cash -= trade_cost
                     # update positions
                     if fill.instrument not in self.positions:
-                        self.positions[fill.instrument] = Position(instrument=fill.instrument, quantity=fill.quantity, costHistory=[fill.price])
+                        self.positions[fill.instrument] = Position(instrument=fill.instrument, quantity=fill.quantity, marketPrice=fill.price, costHistory=[fill.price])
                     else:
-                        self.positions[fill.instrument].quantity = fill.quantity
+                        self.positions[fill.instrument].quantity += fill.quantity
                         self.positions[fill.instrument].costHistory.append(fill.price)
                         self.positions[fill.instrument].marketPrice = fill.price
                     # update equity
@@ -64,11 +65,12 @@ class Portfolio:
                 else: # fill.order_type == OrderType.SELL
                     # update cash
                     self.cash += trade_value
-                    #update hodlings
-                    self.positions[fill.instrument].quantity -= fill.quantity
-                    self.positions[fill.instrument].costHistory.append(fill.price)
+                    #update price
                     self.positions[fill.instrument].marketPrice = fill.price
+                    self.positions[fill.instrument].costHistory.append(fill.price)
                     # update pnl
-                    self.pnl+=trade_value      
-                    # update equity    
-                    self.equity=self.cash + sum([position.unrealizedPnL for position in self.positions.values()])   
+                    self.pnl+=self.positions[fill.instrument].unrealizedPnL
+                    # update positon quantity
+                    self.positions[fill.instrument].quantity -= fill.quantity
+                    # update equity
+                    self.equity=self.cash + sum([position.unrealizedPnL for position in self.positions.values()])

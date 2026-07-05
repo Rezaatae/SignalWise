@@ -1,7 +1,7 @@
 from app.services.portfolio.portfolio import Portfolio
 from app.schemas.signal import SignalResponse
 from app.schemas.ohlvc import OHLCV
-from app.schemas.order import Position, OrderType
+from app.schemas.order import Position, OrderType, Fill
 
 
 def test_portfolio_creates_buy_target_position_from_signal():
@@ -74,16 +74,59 @@ def test_portfolio_creates_sell_order_from_target_positiom():
     assert order.order_type == OrderType.SELL
     assert order.quantity == 100
 
-def test_portfolio_updates_with_fill():
-    test_fill_list = [
-    {
-      "order_id": "18bce87b-8d26-46c6-9115-9bf824e467bc",
-      "instrument": "AAPL",
-      "quantity": 25136,
-      "price": 9.9345,
-      "commission": 624.28398,
-      "timestamp": "2011-06-08T00:00:00"
-    }
-  ]
-    portfolio = Portfolio()
-    pass
+def test_portfolio_updates_with_buy_fills():
+    existing_position = Position(instrument='AAPL', quantity=100, marketPrice=30.0, costHistory=[30.0])
+    portfolio = Portfolio(cash=250000.00, positions={'AAPL':existing_position})
+    test_fills_list = [Fill(order_id='89644b0a-d415-4a92-a6f2-10f53dec1ef5',
+            order_type=OrderType.BUY,
+            instrument="AAPL",
+            quantity= 100,
+            price= 20.0,
+            commission = 5.0,
+            timestamp= "2011-06-08T00:00:00"),
+            Fill(order_id='b64a7d01-4a7d-482e-86e8-0bcafec1ad0b',
+            order_type=OrderType.BUY,
+            instrument="MCSFT",
+            quantity= 300,
+            price= 25.0,
+            commission = 18.75,
+            timestamp= "2011-06-08T00:00:00")]
+
+    portfolio.update(test_fills_list)
+    portfolio_state = portfolio.get_portfolio_state()
+    assert portfolio_state['cash'] == 240476.25 # cash - trade cost
+    assert 'AAPL' in portfolio_state["positions"]
+    assert 'MCSFT' in portfolio_state["positions"]
+    assert portfolio_state["positions"]['AAPL'].quantity == 200
+    assert portfolio_state["positions"]['MCSFT'].quantity == 300
+    assert portfolio_state["equity"] ==  240476.25 + portfolio_state["positions"]['AAPL'].unrealizedPnL + portfolio_state["positions"]['MCSFT'].unrealizedPnL # cash + unrealizedPnL
+    assert portfolio_state["pnl"] == 0
+
+def test_portfolio_updates_with_sell_fills():
+    existing_AAPL_position = Position(instrument='AAPL', quantity=100, marketPrice=10.0, costHistory=[10.0])
+    existing_MCSFT_position = Position(instrument='MCSFT', quantity=100, marketPrice=30.0, costHistory=[30.0])
+    portfolio = Portfolio(cash=250000.00, positions={'AAPL':existing_AAPL_position,
+                                                     'MCSFT': existing_MCSFT_position})
+    test_fills_list = [Fill(order_id='89644b0a-d415-4a92-a6f2-10f53dec1ef5',
+            order_type=OrderType.SELL,
+            instrument="AAPL",
+            quantity= 100,
+            price= 20.0,
+            commission = 5.0,
+            timestamp= "2011-06-08T00:00:00"),
+            Fill(order_id='b64a7d01-4a7d-482e-86e8-0bcafec1ad0b',
+            order_type=OrderType.SELL,
+            instrument="MCSFT",
+            quantity= 100,
+            price= 10.0,
+            commission = 2.5,
+            timestamp= "2011-06-08T00:00:00")]
+    
+    portfolio.update(test_fills_list)
+    portfolio_state = portfolio.get_portfolio_state()
+
+    assert portfolio_state['cash'] == 252992.5 # current cash + trade values (commission goes to broker)
+    assert portfolio_state["positions"]['AAPL'].quantity == 0
+    assert portfolio_state["positions"]['MCSFT'].quantity == 0
+    assert portfolio_state["equity"] == 252992.5 # only cash when no stocks remaining
+    assert portfolio_state["pnl"] == -500 # sum of realised pnl (realised pnl = unrealised pnl at time of trade)
