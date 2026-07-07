@@ -1,6 +1,8 @@
 from app.schemas.signal import SignalResponse
 from app.schemas.order import Position, Order, OrderType, Fill
 from datetime import datetime
+from app.schemas.ohlvc import OHLCV
+
 
 class Portfolio:
     def __init__(self, cash: float=250000.00, positions: dict[str, Position]={}):
@@ -44,33 +46,45 @@ class Portfolio:
                      order_type=order_type, 
                      quantity=order_quantity, 
                      created_at=datetime.now())
-
-    def update(self, fills: list[Fill]):
+    
+    def update(self, fills: list[Fill], price: OHLCV, instrument: str):
         if fills:
-            for fill in fills:
-                trade_value = (fill.price * fill.quantity) - fill.commission
-                trade_cost = (fill.price * fill.quantity) + fill.commission
-                if fill.order_type == OrderType.BUY:
-                    # update cash
-                    self.cash -= trade_cost
-                    # update positions
-                    if fill.instrument not in self.positions:
-                        self.positions[fill.instrument] = Position(instrument=fill.instrument, quantity=fill.quantity, marketPrice=fill.price, costHistory=[fill.price])
-                    else:
-                        self.positions[fill.instrument].quantity += fill.quantity
-                        self.positions[fill.instrument].costHistory.append(fill.price)
-                        self.positions[fill.instrument].marketPrice = fill.price
-                    # update equity
-                    self.equity=self.cash + sum([position.unrealizedPnL for position in self.positions.values()])
-                else: # fill.order_type == OrderType.SELL
-                    # update cash
-                    self.cash += trade_value
-                    #update price
-                    self.positions[fill.instrument].marketPrice = fill.price
+            self._update_portfolio_with_fills(fills)
+        else:
+            self._update_portfolio_with_market_price(price, instrument)
+
+
+    def _update_portfolio_with_market_price(self, price: OHLCV, instrument: str):
+        if instrument in self.positions:
+            self.positions[instrument].costHistory.append(price.close)
+            self.positions[instrument].marketPrice = price.close
+
+
+    def _update_portfolio_with_fills(self, fills: list[Fill]):
+        for fill in fills:
+            trade_value = (fill.price * fill.quantity) - fill.commission
+            trade_cost = (fill.price * fill.quantity) + fill.commission
+            if fill.order_type == OrderType.BUY:
+                # update cash
+                self.cash -= trade_cost
+                # update positions
+                if fill.instrument not in self.positions:
+                    self.positions[fill.instrument] = Position(instrument=fill.instrument, quantity=fill.quantity, marketPrice=fill.price, costHistory=[fill.price])
+                else:
+                    self.positions[fill.instrument].quantity += fill.quantity
                     self.positions[fill.instrument].costHistory.append(fill.price)
-                    # update pnl
-                    self.pnl+=self.positions[fill.instrument].unrealizedPnL
-                    # update positon quantity
-                    self.positions[fill.instrument].quantity -= fill.quantity
-                    # update equity
-                    self.equity=self.cash + sum([position.unrealizedPnL for position in self.positions.values()])
+                    self.positions[fill.instrument].marketPrice = fill.price
+                # update equity
+                self.equity=self.cash + sum([position.unrealizedPnL for position in self.positions.values()])
+            else: # fill.order_type == OrderType.SELL
+                # update cash
+                self.cash += trade_value
+                #update price
+                self.positions[fill.instrument].marketPrice = fill.price
+                self.positions[fill.instrument].costHistory.append(fill.price)
+                # update pnl
+                self.pnl+=self.positions[fill.instrument].unrealizedPnL
+                # update positon quantity
+                self.positions[fill.instrument].quantity -= fill.quantity
+                # update equity
+                self.equity=self.cash + sum([position.unrealizedPnL for position in self.positions.values()])
