@@ -25,7 +25,7 @@ class Backtest:
         signal_engine = Signal(strategyType=self.strategyType, strategyConfig=self.strategyConfig)
         portfolio = Portfolio()
         execution_engine = Execution(self.latency_model, self.cost_model, self.fill_simulator)
-        # analytics_engine = Analytics()
+        analytics_engine = Analytics()
         
         market_data = data_source.get_market_data()
 
@@ -38,6 +38,5 @@ class Backtest:
                 execution_engine.submit_order(order)
             fills = execution_engine.process_orders(market_quote)
             portfolio.update(fills=fills, price=row, instrument=self.instrument)
-            # analytics_engine.record(portfolio)
-        test_return_value.append(portfolio.get_portfolio_state())
-        return test_return_value
+        backtest_results=analytics_engine.record(portfolio)
+        return backtest_results

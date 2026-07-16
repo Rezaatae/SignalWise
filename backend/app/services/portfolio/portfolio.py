@@ -2,7 +2,13 @@ from app.schemas.signal import SignalResponse
 from app.schemas.order import Position, Order, OrderType, Fill
 from datetime import datetime
 from app.schemas.ohlvc import OHLCV
+from app.schemas.analytics import EquityCurve
+from typing import List
 
+#todo: generate - TradeHistory
+# PortfolioHistory
+# EquityCurve
+# ReturnsSeries
 
 class Portfolio:
     def __init__(self, cash: float=250000.00, positions: dict[str, Position]={}):
@@ -11,9 +17,11 @@ class Portfolio:
         # self.holdings=holdings #todo
         self.equity=self.cash + sum([position.unrealizedPnL for position in self.positions.values()])
         self.pnl=0
+        self.last_update = datetime.now()
+        self.equity_series: List[EquityCurve] = []
 
     def get_portfolio_state(self) -> dict[float, dict, float, float]:
-        return {"cash":self.cash, "positions":self.positions, "equity":self.equity, "pnl":self.pnl}
+        return {"timestamp": self.last_update, "cash":self.cash, "positions":self.positions, "equity":self.equity, "pnl":self.pnl}
 
     def construct_target_position(self, signal: SignalResponse) -> Position:
         signal_direction = signal.direction
@@ -52,12 +60,18 @@ class Portfolio:
             self._update_portfolio_with_fills(fills)
         else:
             self._update_portfolio_with_market_price(price, instrument)
-
+        self.last_update = datetime.now()
+        curr_state=self.get_portfolio_state()
+        if not self.equity_series:
+            self.equity_series=[EquityCurve(timestamp=curr_state["timestamp"], equity=curr_state["equity"])]
+        else:
+            self.equity_series.append(EquityCurve(timestamp=curr_state["timestamp"], equity=curr_state["equity"]))
 
     def _update_portfolio_with_market_price(self, price: OHLCV, instrument: str):
         if instrument in self.positions:
             self.positions[instrument].costHistory.append(price.close)
             self.positions[instrument].marketPrice = price.close
+        self.equity=self.cash + sum([position.unrealizedPnL for position in self.positions.values()])
 
 
     def _update_portfolio_with_fills(self, fills: list[Fill]):

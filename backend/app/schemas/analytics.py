@@ -1,14 +1,16 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 class EquityCurve(BaseModel):
     timestamp: datetime
-    equity: float
+    equity: Optional[float]
 
 
 class BacktestResult(BaseModel):
-    ec: List[EquityCurve]
-    sharpe: float
-    drawdown: float
-    vol: float
+    ec: Optional[List[EquityCurve]]
+    daily_vol: Optional[float]
+    daily_returns: Optional[List[float]]
+    vol: Optional[float]
+    # sharpe: Optional[float]
+    # drawdown: Optional[float]
