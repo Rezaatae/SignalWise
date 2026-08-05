@@ -1,21 +1,11 @@
-import { useEffect, useState } from "react";
-import { healthCheck } from "./services/api";
+import { RouterProvider } from 'react-router';
+import { router } from './routes';
+import { ThemeProvider } from './theme/ThemeProvider';
 
-function App() {
-  const [status, setStatus] = useState("");
-
-  useEffect(() => {
-    healthCheck().then((data) => {
-      setStatus(data.status);
-    });
-  }, []);
-
+export default function App() {
   return (
-    <div>
-      <h1>Full Stack App</h1>
-      <p>Backend status: {status}</p>
-    </div>
+    <ThemeProvider defaultTheme="dark" storageKey="signalwise-theme">
+      <RouterProvider router={router} />
+    </ThemeProvider>
   );
 }
-
-export default App;
